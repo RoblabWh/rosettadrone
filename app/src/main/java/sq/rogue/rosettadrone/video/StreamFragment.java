@@ -1,28 +1,34 @@
-package sq.rogue.rosettadrone.logs;
+package sq.rogue.rosettadrone.video;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
+import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
+import dji.sdk.sdkmanager.LiveStreamManager;
 import sq.rogue.rosettadrone.R;
 
-public class LogFragment extends Fragment {
+public class StreamFragment extends Fragment {
 
-//    final Handler handler = new Handler();
+    private VideoFeedView primaryVideoFeedView;
+    private Button init_button;
+    private Button stream_button;
+    private TextView stream_status_text;
+    private LiveStreamManager.OnLiveChangeListener listener;
+    private LiveStreamManager.LiveStreamVideoSource currentVideoSource = LiveStreamManager.LiveStreamVideoSource.Primary;
+
+    //    final Handler handler = new Handler();
     private final String TAG = getClass().getSimpleName();
     //    private final String INSTANCE_STATE_KEY = "saved_state";
     private final int DEFAULT_MAX_CHARACTERS = 200000;
-//    GestureDetector gestureDetector;
+    //    GestureDetector gestureDetector;
     private TextView mTextViewTraffic;
     private ScrollView mScrollView;
     //    Runnable mLongPressed = new Runnable() {
@@ -34,65 +40,28 @@ public class LogFragment extends Fragment {
     private int mMaxCharacters = DEFAULT_MAX_CHARACTERS;
     private int LONG_PRESS_TIMEOUT = 3000;
 
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
 //        Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
+
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     }
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 //        Log.d(TAG, "onCreateView");
-        super.onCreateView(inflater, container, savedInstanceState);
-        this.setRetainInstance(true);
+            super.onCreateView(inflater, container, savedInstanceState);
+            this.setRetainInstance(true);
 
-        View view = inflater.inflate(R.layout.fragment_log, container, false);
-        mTextViewTraffic = view.findViewById(R.id.log);
+            View view = inflater.inflate(R.layout.fragment_stream, container, false);
 
-        mScrollView = (ScrollView) view.findViewById(R.id.textAreaScrollerTraffic);
-
-        mTextViewTraffic.addTextChangedListener(new TextWatcher() {
-
-            @Override
-            public void afterTextChanged(Editable arg0) {
-                if (mViewAtBottom) {
-                    mScrollView.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mScrollView.fullScroll(View.FOCUS_DOWN);
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence arg0, int arg1,
-                                          int arg2, int arg3) {
-                //override stub
-            }
-
-            @Override
-            public void onTextChanged(CharSequence arg0, int arg1, int arg2,
-                                      int arg3) {
-                //override stub
-            }
-        });
-        mScrollView.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
-            @Override
-            public void onScrollChanged() {
-                if (mScrollView != null) {
-                    if (mScrollView.getChildAt(0).getBottom() <= (mScrollView.getHeight() + mScrollView.getScrollY()) + 500) {
-                        mViewAtBottom = true;
-
-                    } else {
-                        mViewAtBottom = false;
-                    }
-                }
-            }
-        });
-
-//        mTextViewTraffic.setHorizontallyScrolling(true);
 
         return view;
     }
@@ -115,9 +84,8 @@ public class LogFragment extends Fragment {
 //        Log.d(TAG, "onActivityCreated");
         super.onActivityCreated(savedInstanceState);
         this.setRetainInstance(true);
-
-
     }
+
 
     /**
      * Checks the length of log and compares it against the maximum number of characters permitted.

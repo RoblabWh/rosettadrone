@@ -1,6 +1,6 @@
 package sq.rogue.rosettadrone;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 
 import com.MAVLink.MAVLinkPacket;
@@ -14,6 +14,7 @@ import com.MAVLink.common.msg_global_position_int;
 import com.MAVLink.common.msg_gps_raw_int;
 import com.MAVLink.common.msg_heartbeat;
 import com.MAVLink.common.msg_home_position;
+import com.MAVLink.common.msg_manual_control;
 import com.MAVLink.common.msg_mission_ack;
 import com.MAVLink.common.msg_mission_count;
 import com.MAVLink.common.msg_mission_item;
@@ -56,9 +57,11 @@ import dji.common.flightcontroller.ConnectionFailSafeBehavior;
 import dji.common.flightcontroller.ControlMode;
 import dji.common.flightcontroller.GPSSignalLevel;
 import dji.common.flightcontroller.LocationCoordinate3D;
+import dji.common.flightcontroller.virtualstick.FlightControlData;
 import dji.common.flightcontroller.virtualstick.RollPitchControlMode;
 import dji.common.flightcontroller.virtualstick.VerticalControlMode;
 import dji.common.flightcontroller.virtualstick.YawControlMode;
+import dji.common.flightcontroller.LEDsSettings;
 import dji.common.mission.waypoint.Waypoint;
 import dji.common.mission.waypoint.WaypointMission;
 import dji.common.mission.waypoint.WaypointMissionState;
@@ -172,7 +175,7 @@ public class DroneModel implements CommonCallbacks.CompletionCallback {
     }
 
     public void setForwardLEDsEnabled(final boolean enabled) {
-        djiAircraft.getFlightController().setLEDsEnabled(enabled, new CommonCallbacks.CompletionCallback() {
+        djiAircraft.getFlightController().setLEDsEnabledSettings(new LEDsSettings.Builder().build(), new CommonCallbacks.CompletionCallback() {
             @Override
             public void onResult(DJIError djiError) {
                 if (djiError == null) {
@@ -837,7 +840,7 @@ public class DroneModel implements CommonCallbacks.CompletionCallback {
 
         msg.latitude = (int) (djiAircraft.getFlightController().getState().getHomeLocation().getLatitude() * Math.pow(10, 7));
         msg.longitude = (int) (djiAircraft.getFlightController().getState().getHomeLocation().getLongitude() * Math.pow(10, 7));
-        msg.altitude = (int) (djiAircraft.getFlightController().getState().getHomePointAltitude());
+        msg.altitude = 0;
 
         // msg.x = 0;
         // msg.y = 0;
@@ -963,6 +966,8 @@ public class DroneModel implements CommonCallbacks.CompletionCallback {
                         else if (param.getParamValue() == 255)
                             getDjiAircraft().getFlightController().setControlMode(ControlMode.UNKNOWN, new ParamWriteCompletionCallback(i));
                         break;
+                    case "DJI_ENBL_MANUAL":
+                        getDjiAircraft().getFlightController().setVirtualStickModeEnabled(param.getParamValue() > 0, new ParamWriteCompletionCallback(i));
                     case "DJI_ENBL_LEDS":
 //                        getDjiAircraft().getFlightController().setLEDsEnabled(param.getParamValue() > 0, new ParamWriteCompletionCallback(i));
                         break;
@@ -1036,12 +1041,17 @@ public class DroneModel implements CommonCallbacks.CompletionCallback {
 
     }
 
+    public void virtual_stick(msg_manual_control message){
+
+        FlightControlData ctrl_data = new FlightControlData(message.x, message.y, message.r, message.z);
+        djiAircraft.getFlightController().sendVirtualStickFlightControlData(ctrl_data, new ParamWriteCompletionCallback(0));
+    }
+
 
     public void send_mission_count() {
         msg_mission_count msg = new msg_mission_count();
         msg.mission_type = MAV_MISSION_TYPE.MAV_MISSION_TYPE_MISSION;
         sendMessage(msg);
-        return;
     }
 
     public void send_mission_item(int i) {

@@ -11,6 +11,7 @@ import com.MAVLink.common.msg_mission_request;
 import com.MAVLink.common.msg_param_request_read;
 import com.MAVLink.common.msg_param_set;
 import com.MAVLink.common.msg_set_mode;
+import com.MAVLink.common.msg_manual_control;
 import com.MAVLink.enums.MAV_CMD;
 import com.MAVLink.enums.MAV_RESULT;
 
@@ -26,6 +27,7 @@ import dji.common.mission.waypoint.WaypointMissionGotoWaypointMode;
 import dji.common.mission.waypoint.WaypointMissionHeadingMode;
 import dji.common.mission.waypoint.WaypointMissionState;
 
+import static com.MAVLink.common.msg_manual_control.MAVLINK_MSG_ID_MANUAL_CONTROL;
 import static com.MAVLink.common.msg_command_int.MAVLINK_MSG_ID_COMMAND_INT;
 import static com.MAVLink.common.msg_command_long.MAVLINK_MSG_ID_COMMAND_LONG;
 import static com.MAVLink.common.msg_heartbeat.MAVLINK_MSG_ID_HEARTBEAT;
@@ -41,6 +43,7 @@ import static com.MAVLink.common.msg_param_request_list.MAVLINK_MSG_ID_PARAM_REQ
 import static com.MAVLink.common.msg_param_request_read.MAVLINK_MSG_ID_PARAM_REQUEST_READ;
 import static com.MAVLink.common.msg_param_set.MAVLINK_MSG_ID_PARAM_SET;
 import static com.MAVLink.common.msg_set_mode.MAVLINK_MSG_ID_SET_MODE;
+
 import static com.MAVLink.enums.MAV_CMD.MAV_CMD_COMPONENT_ARM_DISARM;
 import static com.MAVLink.enums.MAV_CMD.MAV_CMD_DO_DIGICAM_CONTROL;
 import static com.MAVLink.enums.MAV_CMD.MAV_CMD_DO_SET_CAM_TRIGG_DIST;
@@ -93,6 +96,12 @@ public class MAVLinkReceiver {
             case MAVLINK_MSG_ID_HEARTBEAT:
                 this.mTimeStampLastGCSHeartbeat = System.currentTimeMillis();
                 break;
+            case MAVLINK_MSG_ID_MANUAL_CONTROL:
+                //TODO
+                msg_manual_control msg_man = (msg_manual_control) msg;
+                parent.logMessageDJI("Command = " + msg_man.x + " " + msg_man.y + " " + msg_man.z + " " + msg_man.r + " " + msg_man.buttons);
+                mModel.virtual_stick(msg_man);
+
 
             case MAVLINK_MSG_ID_COMMAND_LONG:
                 msg_command_long msg_cmd = (msg_command_long) msg;

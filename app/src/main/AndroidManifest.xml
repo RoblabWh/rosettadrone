@@ -16,6 +16,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <uses-feature
         android:name="android.hardware.usb.host"
@@ -33,7 +34,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name="sq.rogue.rosettadrone.MainActivity"
-            android:launchMode="singleInstance">
+            android:launchMode="singleInstance"
+            android:screenOrientation="sensorLandscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <action android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED" />
@@ -43,11 +45,13 @@
             <meta-data
                 android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"
                 android:resource="@xml/accessory_filter" />
+
         </activity>
         <activity android:name="sq.rogue.rosettadrone.settings.SettingsActivity"
             android:theme="@style/AppTheme.Settings"
             android:label="Settings">
         </activity>
+        <uses-library android:name="org.apache.http.legacy" android:required="false"/>
         <!-- DJI SDK -->
         <uses-library android:name="com.android.future.usb.accessory"/>
         <meta-data
@@ -56,8 +60,7 @@
 
         <service android:name="dji.sdk.sdkmanager.DJIGlobalService">
         </service>
-        <service android:name=".video.VideoService">
-        </service>
+
 
         <!-- DJI SDK -->
     </application>

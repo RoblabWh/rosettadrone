@@ -6,36 +6,27 @@ package sq.rogue.rosettadrone;
 // MenuItemTetColor: RPP @ https://stackoverflow.com/questions/31713628/change-menuitem-text-color-programmatically
 
 import android.Manifest;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.graphics.drawable.Drawable;
 import android.hardware.usb.UsbManager;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkCapabilities;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
-import android.os.RemoteException;
-import android.support.annotation.NonNull;
-import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.preference.PreferenceManager;
+
+import androidx.annotation.NonNull;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -67,37 +58,28 @@ import java.lang.ref.WeakReference;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.MalformedURLException;
 import java.net.SocketException;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import dji.common.error.DJIError;
 import dji.common.error.DJISDKError;
-import dji.midware.natives.SDKRelativeJNI;
 import dji.sdk.base.BaseComponent;
 import dji.sdk.base.BaseProduct;
 import dji.sdk.products.Aircraft;
+import dji.sdk.sdkmanager.DJISDKInitEvent;
 import dji.sdk.sdkmanager.DJISDKManager;
 import sq.rogue.rosettadrone.logs.LogFragment;
 import sq.rogue.rosettadrone.settings.SettingsActivity;
-import sq.rogue.rosettadrone.video.VideoService;
+import sq.rogue.rosettadrone.video.StreamFragment;
+import sq.rogue.rosettadrone.video.VideoFragment;
 
-import static android.support.design.widget.Snackbar.LENGTH_LONG;
+import static com.google.android.material.snackbar.Snackbar.LENGTH_LONG;
 import static sq.rogue.rosettadrone.util.safeSleep;
-import static sq.rogue.rosettadrone.video.VideoService.ACTION_DRONE_CONNECTED;
-import static sq.rogue.rosettadrone.video.VideoService.ACTION_DRONE_DISCONNECTED;
-import static sq.rogue.rosettadrone.video.VideoService.ACTION_RESTART;
-import static sq.rogue.rosettadrone.video.VideoService.ACTION_SET_MODEL;
-import static sq.rogue.rosettadrone.video.VideoService.ACTION_START;
-import static sq.rogue.rosettadrone.video.VideoService.ACTION_STOP;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -128,6 +110,8 @@ public class MainActivity extends AppCompatActivity {
     private LogFragment logDJI;
     private LogFragment logOutbound;
     private LogFragment logInbound;
+    private StreamFragment videoStream;
+    private VideoFragment pilotVideo;
     private BottomNavigationView mBottomNavigation;
     private int navState = -1;
     private SharedPreferences prefs;
@@ -190,6 +174,12 @@ public class MainActivity extends AppCompatActivity {
         public void onProductDisconnect() {
             notifyStatusChange();
         }
+
+        @Override
+        public void onDatabaseDownloadProgress(long first, long second) {}
+
+        @Override
+        public void onInitProcess(DJISDKInitEvent event, int i) {}
 
         @Override
         public void onProductConnect(BaseProduct newProduct) {
@@ -358,6 +348,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
     /**
      *
      */
@@ -371,19 +362,59 @@ public class MainActivity extends AppCompatActivity {
                         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                         switch (item.getItemId()) {
                             case R.id.action_dji:
+                                if (videoStream != null) {
+                                    fragmentTransaction.hide(videoStream);
+                                }
+                                if (pilotVideo != null) {
+                                    fragmentTransaction.hide(pilotVideo);
+                                }
                                 fragmentTransaction.show(logDJI);
                                 fragmentTransaction.hide(logOutbound);
                                 fragmentTransaction.hide(logInbound);
                                 break;
                             case R.id.action_gcs_up:
+                                if (videoStream != null) {
+                                    fragmentTransaction.hide(videoStream);
+                                }
+                                if (pilotVideo != null) {
+                                    fragmentTransaction.hide(pilotVideo);
+                                }
                                 fragmentTransaction.hide(logDJI);
                                 fragmentTransaction.show(logOutbound);
                                 fragmentTransaction.hide(logInbound);
                                 break;
                             case R.id.action_gcs_down:
+                                if (videoStream != null) {
+                                    fragmentTransaction.hide(videoStream);
+                                }
+                                if (pilotVideo != null) {
+                                    fragmentTransaction.hide(pilotVideo);
+                                }
                                 fragmentTransaction.hide(logDJI);
                                 fragmentTransaction.hide(logOutbound);
                                 fragmentTransaction.show(logInbound);
+                                break;
+                            case R.id.action_stream:
+                                if (videoStream != null) {
+                                    fragmentTransaction.show(videoStream);
+                                }
+                                if (pilotVideo != null) {
+                                    fragmentTransaction.hide(pilotVideo);
+                                }
+                                fragmentTransaction.hide(logDJI);
+                                fragmentTransaction.hide(logOutbound);
+                                fragmentTransaction.hide(logInbound);
+                                break;
+                            case R.id.action_video:
+                                if (videoStream != null) {
+                                    fragmentTransaction.hide(videoStream);
+                                }
+                                if (pilotVideo != null) {
+                                    fragmentTransaction.show(pilotVideo);
+                                }
+                                fragmentTransaction.hide(logDJI);
+                                fragmentTransaction.hide(logOutbound);
+                                fragmentTransaction.hide(logInbound);
                                 break;
                         }
                         fragmentTransaction.commit();
@@ -816,6 +847,17 @@ public class MainActivity extends AppCompatActivity {
 
         if (prefs.getBoolean("pref_enable_video", false)) {
             sendDroneConnected();
+            fragmentManager = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+            pilotVideo = new VideoFragment();
+            fragmentTransaction.add(R.id.fragment_container, pilotVideo);
+            fragmentTransaction.hide(pilotVideo);
+            videoStream = new StreamFragment();
+            fragmentTransaction.add(R.id.fragment_container, videoStream);
+            fragmentTransaction.hide(videoStream);
+
+            fragmentTransaction.commit();
         } else {
             sendDroneDisconnected();
         }
@@ -915,16 +957,16 @@ public class MainActivity extends AppCompatActivity {
      *
      */
     private void sendStartVideoService() {
-        Intent intent = setupIntent(ACTION_START);
-        sendIntent(intent);
+        //Intent intent = setupIntent(ACTION_START);
+        //sendIntent(intent);
     }
 
     /**
      *
      */
     private void sendStopVideoService() {
-        Intent intent = setupIntent(ACTION_STOP);
-        sendIntent(intent);
+        //Intent intent = setupIntent(ACTION_STOP);
+        //sendIntent(intent);
     }
 
     /**
@@ -936,17 +978,17 @@ public class MainActivity extends AppCompatActivity {
         int videoPort = Integer.parseInt(prefs.getString("pref_video_port", "5600"));
 
         logMessageDJI("Restarting Video link to " + videoIP + ":" + videoPort);
-        Intent intent = setupIntent(ACTION_RESTART);
-        intent.putExtra("model", mProduct.getModel());
-        sendIntent(intent);
+        //Intent intent = setupIntent(ACTION_RESTART);
+        //intent.putExtra("model", mProduct.getModel());
+        //sendIntent(intent);
     }
 
     /**
      *
      */
     private void sendSetBackingMode() {
-        Intent intent = setupIntent(ACTION_SET_MODEL);
-        sendIntent(intent);
+        //Intent intent = setupIntent(ACTION_SET_MODEL);
+        //sendIntent(intent);
     }
 
     /**
@@ -975,17 +1017,17 @@ public class MainActivity extends AppCompatActivity {
 
         logMessageDJI("Starting Video link to " + videoIP + ":" + videoPort);
 
-        Intent intent = setupIntent(ACTION_DRONE_CONNECTED);
-        intent.putExtra("model", mProduct.getModel());
-        sendIntent(intent);
+        //Intent intent = setupIntent(ACTION_DRONE_CONNECTED);
+        //intent.putExtra("model", mProduct.getModel());
+        //sendIntent(intent);
     }
 
     /**
      *
      */
     private void sendDroneDisconnected() {
-        Intent intent = setupIntent(ACTION_DRONE_DISCONNECTED);
-        sendIntent(intent);
+        //Intent intent = setupIntent(ACTION_DRONE_DISCONNECTED);
+        //sendIntent(intent);
     }
 
     private String getVideoIP() {
@@ -1075,16 +1117,16 @@ public class MainActivity extends AppCompatActivity {
      * @param extras
      * @return
      */
-    private Intent setupIntent(String action, Object... extras) {
-        Intent intent = new Intent(this, VideoService.class);
-        intent.setAction(action);
-
-//        for (Object extra : extras) {
-////            intent.putExtra()
-//        }
-
-        return intent;
-    }
+//    private Intent setupIntent(String action, Object... extras) {
+//        Intent intent = new Intent(this, VideoService.class);
+//        intent.setAction(action);
+//
+////        for (Object extra : extras) {
+//////            intent.putExtra()
+////        }
+//
+//        return intent;
+//    }
 
     /**
      * @param intent

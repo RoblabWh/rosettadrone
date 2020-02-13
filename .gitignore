@@ -8,6 +8,9 @@
 # Java class files
 *.class
 
+#cxx files
+app/.cxx/
+
 # Generated files
 bin/
 gen/
@@ -43,6 +46,9 @@ captures/
 .idea/libraries
 .idea/modules.xml
 .idea/runConfigurations.xml
+.idea/caches/
+.idea/codeStyles/Project.xml
+
 
 # Keystore files
 *.jks

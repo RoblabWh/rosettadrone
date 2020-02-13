@@ -25,4 +25,19 @@
         android:icon="@drawable/ic_down_arrow_white_24dp"
         android:title="@string/gcs"
         app:showAsAction="ifRoom" />
+
+    <!-- Icon made by Freepik at flaticon.com -->
+    <item
+        android:id="@+id/action_video"
+        android:enabled="true"
+        android:icon="@drawable/ic_drone"
+        android:title="@string/video"
+        app:showAsAction="ifRoom" />
+    <!-- Icon made by Freepik at flaticon.com -->
+    <item
+        android:id="@+id/action_stream"
+        android:enabled="true"
+        android:icon="@drawable/ic_drone"
+        android:title="@string/dji"
+        app:showAsAction="ifRoom" />
 </menu>
