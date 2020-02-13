@@ -93,7 +93,7 @@ public class VideoFragment extends Fragment {
         if (!isFullscreen) {
 
             appBarLayout.setVisibility(View.GONE);
-            appBarLayout.setExpanded(true, true);
+            appBarLayout.setExpanded(false, true);
 
 //            CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams)appBarLayout.getLayoutParams();
 //            this.appbarheight = lp.height;
@@ -110,7 +110,7 @@ public class VideoFragment extends Fragment {
             unregisterSystemUiVisibility();
             exitFullscreen(getActivity());
             appBarLayout.setVisibility(View.VISIBLE);
-            appBarLayout.setExpanded(false, true);
+            appBarLayout.setExpanded(true, true);
 
 //            CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams)appBarLayout.getLayoutParams();
 //            lp.height = this.appbarheight;
